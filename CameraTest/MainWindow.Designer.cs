@@ -230,6 +230,8 @@
             // videoSourcePlayer1
             // 
             this.videoSourcePlayer1.BackColor = System.Drawing.SystemColors.ActiveBorder;
+            this.videoSourcePlayer1.Font = new System.Drawing.Font("Microsoft Sans Serif", 21.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.videoSourcePlayer1.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
             this.videoSourcePlayer1.Location = new System.Drawing.Point(624, 257);
             this.videoSourcePlayer1.Name = "videoSourcePlayer1";
             this.videoSourcePlayer1.Size = new System.Drawing.Size(175, 90);

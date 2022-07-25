@@ -152,8 +152,6 @@ namespace CaptureDisplay
                 captureDevice.SignalToStop();
                 captureDevice.WaitForStop();
                 captureDevice.NewFrame -= CaptureDevice_NewFrame;
-                pictureBox1.Image = null;
-                pictureBox2.Image = null;
             }
             if(videoSourcePlayer1.VideoSource!=null)
             {
@@ -174,7 +172,7 @@ namespace CaptureDisplay
                         pictureBox1.Visible = true;
                         pictureBox2.Visible = false;
                     }
-                    else
+                    else if(settings.RenderMode == 2)
                     {
                         pictureBox1.Visible = false;
                         pictureBox2.Visible = true;
@@ -193,7 +191,7 @@ namespace CaptureDisplay
                 captureDevice.Start();
                 for (int i = 0; i < captureDevice.VideoCapabilities.Length; i++)
                 {
-                    RenderSizeComboBox.Items.Add(captureDevice.VideoCapabilities[i].FrameSize.Width.ToString() + " x " + captureDevice.VideoCapabilities[i].FrameSize.Height.ToString() + " @" + captureDevice.VideoCapabilities[i].MaximumFrameRate);
+                    RenderSizeComboBox.Items.Add(captureDevice.VideoCapabilities[i].FrameSize.Width.ToString() + " x " + captureDevice.VideoCapabilities[i].FrameSize.Height.ToString() + " @" + captureDevice.VideoCapabilities[i].AverageFrameRate);
                 }
                 if (RenderSizeComboBox.Items.Count > 0)
                 {
@@ -205,7 +203,6 @@ namespace CaptureDisplay
                     {
                         RenderSizeComboBox.SelectedIndex = 0;
                     }
-                    UpdateDisplayMode();
                 }
             }
         }
@@ -229,9 +226,10 @@ namespace CaptureDisplay
                 {
                     if (settings.RenderMode == 1)
                     {
-                        pictureBox1.Image = (Bitmap)eventArgs.Frame.Clone();
+                        Bitmap bitmap = (Bitmap)eventArgs.Frame.Clone();
+                        pictureBox1.Image = bitmap;
                     }
-                    else
+                    else if(settings.RenderMode == 2)
                     {
                         pictureBox2.Image = (Bitmap)eventArgs.Frame.Clone();
                     }
@@ -326,20 +324,20 @@ namespace CaptureDisplay
         #region Display/Scale Options
         private void RenderSizeComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (captureDevice != null)
+            if (RenderSizeComboBox.SelectedIndex != -1)
             {
-                var tempFPS = FPSCount;
-                FPSCount = false;
-                captureDevice.SignalToStop();
-                captureDevice.WaitForStop();
-                if (RenderSizeComboBox.SelectedIndex != -1)
+                if (captureDevice != null)
                 {
+                    var tempFPS = FPSCount;
+                    FPSCount = false;
+                    captureDevice.SignalToStop();
+                    captureDevice.WaitForStop();
                     captureDevice.VideoResolution = captureDevice.VideoCapabilities[RenderSizeComboBox.SelectedIndex];
+                    UpdateDisplayMode();
+                    captureDevice.Start();
+                    FPSCount = tempFPS;
+                    SetSettings();
                 }
-                UpdateDisplayMode();
-                captureDevice.Start();
-                FPSCount = tempFPS;
-                SetSettings();
             }
         }
 
@@ -477,12 +475,17 @@ namespace CaptureDisplay
                 videoSourcePlayer1.Location = new Point((ClientSize.Width - videoSourcePlayer1.ClientSize.Width) / 2, (ClientSize.Height - videoSourcePlayer1.ClientSize.Height) / 2);
             }
             change = true;
+            AutoSize = false;
             pictureBox1.Location = videoSourcePlayer1.Location;
             pictureBox1.Size = videoSourcePlayer1.Size;
             pictureBox1.Dock = videoSourcePlayer1.Dock;
             pictureBox2.Location = videoSourcePlayer1.Location;
             pictureBox2.Size = videoSourcePlayer1.Size;
             pictureBox2.Dock = videoSourcePlayer1.Dock;
+            if (DisplaySizeComboBox.SelectedIndex == 0)
+            {
+                AutoSize = true;
+            }
             change = false;
         }
 
@@ -496,7 +499,7 @@ namespace CaptureDisplay
         {
             if(RenderModeComboBox.SelectedIndex!=-1)
             {
-                    settings.RenderMode = RenderModeComboBox.SelectedIndex;
+                settings.RenderMode = RenderModeComboBox.SelectedIndex;
                 SetSettings();
                 InitalizeCamera();
             }
@@ -572,5 +575,6 @@ namespace CaptureDisplay
                 UpdateDisplayMode();
             }
         }
+
     }
 }
