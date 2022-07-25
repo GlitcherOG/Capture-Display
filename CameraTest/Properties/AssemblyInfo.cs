@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Capture Display")]
-[assembly: AssemblyDescription("Disaply the Capture From Shitty USB Capture cards")]
+[assembly: AssemblyDescription("Display the Capture From Shitty USB Capture cards")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Glitcher INC")]
 [assembly: AssemblyProduct("Capture Display")]
