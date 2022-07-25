@@ -4,16 +4,18 @@ This project was originally started cause someone else showed me theres and i th
 
 [the other persons application](https://github.com/Jordy3D/VideoIn-Out).
 
+## Hotkeys
+- Escape: Quit
+- C: Toggle FPS Counter
+- F: Toggle Fullscreen
+- Right Click: Toggle Toolbar
+- Double Click: Toggle Fullscreen and Toolbar
+
 ## TODO
-- [X] Video Selection
-- [X] Render Resolution
-- [X] Display
-- [X] FPS Counter
-- [X] Fix FPS Crashing
-- [X] Audio Selection
-- [X] Tool Strip But Right Click Hides it 
-- [X] Fullscreen
-- [X] Fix Fullscreen Being Weird
 - [ ] Overlays and Filters
-- [X] Single Exe
-- [X] Destroy other tool in terms of coolness and features
+- [ ] Settings Window
+- [ ] Code Clean Up
+- [ ] Minimize Virus Scaner Issues
+
+[![Donate](https://www.paypalobjects.com/en_AU/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?business=VT6TG8KKZM98E&no_recurring=0&currency_code=AUD)
+[Donate] (https://www.paypal.com/donate/?business=VT6TG8KKZM98E&no_recurring=0&currency_code=AUD)

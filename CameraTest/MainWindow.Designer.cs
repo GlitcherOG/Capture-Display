@@ -47,10 +47,12 @@
             this.toolStripLabel5 = new System.Windows.Forms.ToolStripLabel();
             this.RenderModeComboBox = new System.Windows.Forms.ToolStripComboBox();
             this.FPSCounter = new System.Windows.Forms.Label();
-            this.videoSourcePlayer1 = new AForge.Controls.VideoSourcePlayer();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.videoSourcePlayer1 = new Accord.Controls.VideoSourcePlayer();
+            this.pictureBox2 = new Accord.Controls.PictureBox();
             this.toolStrip2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             this.SuspendLayout();
             // 
             // toolStrip2
@@ -194,7 +196,8 @@
             this.RenderModeComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.RenderModeComboBox.Items.AddRange(new object[] {
             "Video Player",
-            "Picture Mode"});
+            "Picture Mode",
+            "Picture Mode 2"});
             this.RenderModeComboBox.Name = "RenderModeComboBox";
             this.RenderModeComboBox.Size = new System.Drawing.Size(121, 25);
             this.RenderModeComboBox.SelectedIndexChanged += new System.EventHandler(this.toolStripComboBox1_SelectedIndexChanged);
@@ -211,22 +214,6 @@
             this.FPSCounter.TabIndex = 5;
             this.FPSCounter.Text = "FPS: 0";
             // 
-            // videoSourcePlayer1
-            // 
-            this.videoSourcePlayer1.BackColor = System.Drawing.SystemColors.ActiveBorder;
-            this.videoSourcePlayer1.ForeColor = System.Drawing.SystemColors.Window;
-            this.videoSourcePlayer1.ImeMode = System.Windows.Forms.ImeMode.On;
-            this.videoSourcePlayer1.Location = new System.Drawing.Point(666, 257);
-            this.videoSourcePlayer1.Name = "videoSourcePlayer1";
-            this.videoSourcePlayer1.Size = new System.Drawing.Size(140, 87);
-            this.videoSourcePlayer1.TabIndex = 6;
-            this.videoSourcePlayer1.Text = "videoSourcePlayer1";
-            this.videoSourcePlayer1.VideoSource = null;
-            this.videoSourcePlayer1.Visible = false;
-            this.videoSourcePlayer1.DoubleClick += new System.EventHandler(this.pictureBox1_DoubleClick);
-            this.videoSourcePlayer1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.videoSourcePlayer1_KeyDown);
-            this.videoSourcePlayer1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseDown);
-            // 
             // pictureBox1
             // 
             this.pictureBox1.BackColor = System.Drawing.SystemColors.ActiveCaption;
@@ -240,6 +227,32 @@
             this.pictureBox1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseDown);
             this.pictureBox1.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.pictureBox1_PreviewKeyDown);
             // 
+            // videoSourcePlayer1
+            // 
+            this.videoSourcePlayer1.BackColor = System.Drawing.SystemColors.ActiveBorder;
+            this.videoSourcePlayer1.Location = new System.Drawing.Point(624, 257);
+            this.videoSourcePlayer1.Name = "videoSourcePlayer1";
+            this.videoSourcePlayer1.Size = new System.Drawing.Size(175, 90);
+            this.videoSourcePlayer1.TabIndex = 8;
+            this.videoSourcePlayer1.Text = "videoSourcePlayer1";
+            this.videoSourcePlayer1.VideoSource = null;
+            this.videoSourcePlayer1.DoubleClick += new System.EventHandler(this.pictureBox1_DoubleClick);
+            this.videoSourcePlayer1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.videoSourcePlayer1_KeyDown);
+            this.videoSourcePlayer1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseDown);
+            // 
+            // pictureBox2
+            // 
+            this.pictureBox2.BackColor = System.Drawing.SystemColors.ButtonFace;
+            this.pictureBox2.Image = null;
+            this.pictureBox2.Location = new System.Drawing.Point(461, 111);
+            this.pictureBox2.Name = "pictureBox2";
+            this.pictureBox2.Size = new System.Drawing.Size(148, 77);
+            this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox2.TabIndex = 9;
+            this.pictureBox2.TabStop = false;
+            this.pictureBox2.DoubleClick += new System.EventHandler(this.pictureBox1_DoubleClick);
+            this.pictureBox2.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseDown);
+            // 
             // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -248,8 +261,9 @@
             this.ClientSize = new System.Drawing.Size(1264, 681);
             this.Controls.Add(this.FPSCounter);
             this.Controls.Add(this.toolStrip2);
-            this.Controls.Add(this.videoSourcePlayer1);
             this.Controls.Add(this.pictureBox1);
+            this.Controls.Add(this.videoSourcePlayer1);
+            this.Controls.Add(this.pictureBox2);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "MainWindow";
@@ -262,6 +276,7 @@
             this.toolStrip2.ResumeLayout(false);
             this.toolStrip2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -284,10 +299,11 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private System.Windows.Forms.Label FPSCounter;
         private System.Windows.Forms.ToolStripButton Fullscreen;
-        private AForge.Controls.VideoSourcePlayer videoSourcePlayer1;
         private System.Windows.Forms.ToolStripComboBox RenderModeComboBox;
         private System.Windows.Forms.ToolStripLabel toolStripLabel5;
         private System.Windows.Forms.PictureBox pictureBox1;
+        private Accord.Controls.VideoSourcePlayer videoSourcePlayer1;
+        private Accord.Controls.PictureBox pictureBox2;
     }
 }
 

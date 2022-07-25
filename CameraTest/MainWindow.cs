@@ -8,8 +8,10 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using AForge.Video.DirectShow;
-using AForge.Video;
+//using AForge.Video.DirectShow;
+//using AForge.Video;
+using Accord.Video;
+using Accord.Video.DirectShow;
 using NAudio.Wave;
 using NAudio.CoreAudioApi;
 
@@ -43,6 +45,10 @@ namespace CaptureDisplay
             InitializeComponent();
             videoSourcePlayer1.BackColor = Color.Black;
             pictureBox1.BackColor = Color.Black;
+            pictureBox2.BackColor = Color.Black;
+            videoSourcePlayer1.Dock = DockStyle.Fill;
+            pictureBox1.Dock = DockStyle.Fill;
+            pictureBox2.Dock = DockStyle.Fill;
             FPSCount = false;
             FPSCounter.Visible = FPSCount;
             //RenderModeComboBox.SelectedIndex = 0;
@@ -146,6 +152,8 @@ namespace CaptureDisplay
                 captureDevice.SignalToStop();
                 captureDevice.WaitForStop();
                 captureDevice.NewFrame -= CaptureDevice_NewFrame;
+                pictureBox1.Image = null;
+                pictureBox2.Image = null;
             }
             if(videoSourcePlayer1.VideoSource!=null)
             {
@@ -158,10 +166,19 @@ namespace CaptureDisplay
             {
                 captureDevice = new VideoCaptureDevice(infoCollection[VideoComboBox.SelectedIndex].MonikerString);
 
-                if (settings.RenderMode == 1)
+                if (settings.RenderMode == 1 || settings.RenderMode == 2)
                 {
                     captureDevice.NewFrame += CaptureDevice_NewFrame;
-                    pictureBox1.Visible = true;
+                    if (settings.RenderMode == 1)
+                    {
+                        pictureBox1.Visible = true;
+                        pictureBox2.Visible = false;
+                    }
+                    else
+                    {
+                        pictureBox1.Visible = false;
+                        pictureBox2.Visible = true;
+                    }
                     videoSourcePlayer1.Visible = false;
                 }
                 else
@@ -174,18 +191,9 @@ namespace CaptureDisplay
                 }
 
                 captureDevice.Start();
-                try
-                {
-                    captureDevice.SetCameraProperty(CameraControlProperty.Exposure, 1, CameraControlFlags.Auto);
-                }
-                catch
-                {
-
-                }
-
                 for (int i = 0; i < captureDevice.VideoCapabilities.Length; i++)
                 {
-                    RenderSizeComboBox.Items.Add(captureDevice.VideoCapabilities[i].FrameSize.Width.ToString() + " x " + captureDevice.VideoCapabilities[i].FrameSize.Height.ToString());
+                    RenderSizeComboBox.Items.Add(captureDevice.VideoCapabilities[i].FrameSize.Width.ToString() + " x " + captureDevice.VideoCapabilities[i].FrameSize.Height.ToString() + " @" + captureDevice.VideoCapabilities[i].MaximumFrameRate);
                 }
                 if (RenderSizeComboBox.Items.Count > 0)
                 {
@@ -197,6 +205,7 @@ namespace CaptureDisplay
                     {
                         RenderSizeComboBox.SelectedIndex = 0;
                     }
+                    UpdateDisplayMode();
                 }
             }
         }
@@ -218,7 +227,14 @@ namespace CaptureDisplay
             {
                 try
                 {
-                    pictureBox1.Image = (Bitmap)eventArgs.Frame.Clone();
+                    if (settings.RenderMode == 1)
+                    {
+                        pictureBox1.Image = (Bitmap)eventArgs.Frame.Clone();
+                    }
+                    else
+                    {
+                        pictureBox2.Image = (Bitmap)eventArgs.Frame.Clone();
+                    }
                 }
                 catch
                 {
@@ -340,68 +356,63 @@ namespace CaptureDisplay
 
         void UpdateDisplayMode()
         {
-            if (MainWindow.ActiveForm != null)
+            if (DisplaySizeComboBox.SelectedIndex != -1 && RenderSizeComboBox.SelectedIndex != -1)
             {
-                if (DisplaySizeComboBox.SelectedIndex != -1 && RenderSizeComboBox.SelectedIndex!=-1)
+                bool Test = false;
+                if (WindowState == FormWindowState.Maximized && !FullscreenBool)
                 {
-                    bool Test = false;
-                    if (WindowState == FormWindowState.Maximized && !FullscreenBool)
+                    Test = true;
+                }
+                if (DisplaySizeComboBox.SelectedIndex == 0)
+                {
+                    FormBorderStyle = FormBorderStyle.FixedSingle;
+                    AutoSize = true;
+                    if (captureDevice != null)
                     {
-                        Test = true;
-                    }
-                    if (DisplaySizeComboBox.SelectedIndex == 0)
-                    {
-                        MainWindow.ActiveForm.FormBorderStyle = FormBorderStyle.FixedSingle;
-                        MainWindow.ActiveForm.AutoSize = true;
-                        if (captureDevice != null)
-                        {
-                            videoSourcePlayer1.Dock = DockStyle.None;
-                            pictureBox1.Dock = DockStyle.None;
-                            MainWindow.ActiveForm.Size = new Size(captureDevice.VideoCapabilities[RenderSizeComboBox.SelectedIndex].FrameSize.Width, captureDevice.VideoCapabilities[RenderSizeComboBox.SelectedIndex].FrameSize.Height);
-                            videoSourcePlayer1.Size = new Size(captureDevice.VideoCapabilities[RenderSizeComboBox.SelectedIndex].FrameSize.Width, captureDevice.VideoCapabilities[RenderSizeComboBox.SelectedIndex].FrameSize.Height);
-                        }
-                    }
-                    if (DisplaySizeComboBox.SelectedIndex == 1)
-                    {
-                        MainWindow.ActiveForm.AutoSize = false;
-                        MainWindow.ActiveForm.FormBorderStyle = FormBorderStyle.Sizable;
-                        videoSourcePlayer1.Dock = DockStyle.Fill;
-                    }
-                    if(DisplaySizeComboBox.SelectedIndex == 2)
-                    {
-                        MainWindow.ActiveForm.AutoSize = false;
-                        MainWindow.ActiveForm.FormBorderStyle = FormBorderStyle.Sizable;
                         videoSourcePlayer1.Dock = DockStyle.None;
+                        Size = new Size(captureDevice.VideoCapabilities[RenderSizeComboBox.SelectedIndex].FrameSize.Width, captureDevice.VideoCapabilities[RenderSizeComboBox.SelectedIndex].FrameSize.Height);
+                        videoSourcePlayer1.Size = new Size(captureDevice.VideoCapabilities[RenderSizeComboBox.SelectedIndex].FrameSize.Width, captureDevice.VideoCapabilities[RenderSizeComboBox.SelectedIndex].FrameSize.Height);
                     }
-                    if (DisplaySizeComboBox.SelectedIndex == 3)
-                    {
-                        MainWindow.ActiveForm.AutoSize = false;
-                        MainWindow.ActiveForm.FormBorderStyle = FormBorderStyle.Sizable;
-                        videoSourcePlayer1.Dock = DockStyle.None;
-                    }
-                    if (DisplaySizeComboBox.SelectedIndex == 4)
-                    {
-                        MainWindow.ActiveForm.AutoSize = false;
-                        MainWindow.ActiveForm.FormBorderStyle = FormBorderStyle.Sizable;
-                        videoSourcePlayer1.Dock = DockStyle.None;
-                    }
-                    SizeObjectsScale();
-                    if (FullscreenBool)
+                }
+                if (DisplaySizeComboBox.SelectedIndex == 1)
+                {
+                    AutoSize = false;
+                    FormBorderStyle = FormBorderStyle.Sizable;
+                    videoSourcePlayer1.Dock = DockStyle.Fill;
+                }
+                if (DisplaySizeComboBox.SelectedIndex == 2)
+                {
+                    AutoSize = false;
+                    FormBorderStyle = FormBorderStyle.Sizable;
+                    videoSourcePlayer1.Dock = DockStyle.None;
+                }
+                if (DisplaySizeComboBox.SelectedIndex == 3)
+                {
+                    AutoSize = false;
+                    FormBorderStyle = FormBorderStyle.Sizable;
+                    videoSourcePlayer1.Dock = DockStyle.None;
+                }
+                if (DisplaySizeComboBox.SelectedIndex == 4)
+                {
+                    AutoSize = false;
+                    FormBorderStyle = FormBorderStyle.Sizable;
+                    videoSourcePlayer1.Dock = DockStyle.None;
+                }
+                SizeObjectsScale();
+                if (FullscreenBool)
+                {
+                    WindowState = FormWindowState.Normal;
+                    FormBorderStyle = FormBorderStyle.None;
+                    WindowState = FormWindowState.Maximized;
+                }
+                else
+                {
+                    if (!Test)
                     {
                         WindowState = FormWindowState.Normal;
-                        MainWindow.ActiveForm.FormBorderStyle = FormBorderStyle.None;
-                        WindowState = FormWindowState.Maximized;
-                    }
-                    else
-                    {
-                        if (!Test)
-                        {
-                            WindowState = FormWindowState.Normal;
-                        }
                     }
                 }
             }
-
         }
 
         private void Fullscreen_Click(object sender, EventArgs e)
@@ -414,65 +425,65 @@ namespace CaptureDisplay
         {
             SizeObjectsScale();
         }
-        
+
         void SizeObjectsScale()
         {
-            if (MainWindow.ActiveForm != null)
+            if (DisplaySizeComboBox.SelectedIndex == 0)
             {
-                if (DisplaySizeComboBox.SelectedIndex == 0)
-                {
-                    MainWindow.ActiveForm.AutoSize = false;
-                    videoSourcePlayer1.Location = new Point((MainWindow.ActiveForm.ClientSize.Width - videoSourcePlayer1.ClientSize.Width) / 2, (MainWindow.ActiveForm.ClientSize.Height - videoSourcePlayer1.ClientSize.Height) / 2);
-                    MainWindow.ActiveForm.AutoSize = true;
-                }
-                if (DisplaySizeComboBox.SelectedIndex == 2)
-                {
-                    int test = (MainWindow.ActiveForm.ClientSize.Width / 16) * 9;
-                    if (test > MainWindow.ActiveForm.ClientSize.Height)
-                    {
-                        test = (MainWindow.ActiveForm.ClientSize.Height / 9) * 16;
-                        videoSourcePlayer1.Size = new Size(test, MainWindow.ActiveForm.ClientSize.Height);
-                    }
-                    else
-                    {
-                        videoSourcePlayer1.Size = new Size(MainWindow.ActiveForm.ClientSize.Width, test);
-                    }
-                    videoSourcePlayer1.Location = new Point((MainWindow.ActiveForm.ClientSize.Width - videoSourcePlayer1.ClientSize.Width) / 2, (MainWindow.ActiveForm.ClientSize.Height - videoSourcePlayer1.ClientSize.Height) / 2);
-                }
-                if (DisplaySizeComboBox.SelectedIndex == 3)
-                {
-                    int test = (MainWindow.ActiveForm.ClientSize.Width / 16) * 10;
-                    if (test > MainWindow.ActiveForm.ClientSize.Height)
-                    {
-                        test = (MainWindow.ActiveForm.ClientSize.Height / 10) * 16;
-                        videoSourcePlayer1.Size = new Size(test, MainWindow.ActiveForm.ClientSize.Height);
-                    }
-                    else
-                    {
-                        videoSourcePlayer1.Size = new Size(MainWindow.ActiveForm.ClientSize.Width, test);
-                    }
-                    videoSourcePlayer1.Location = new Point((MainWindow.ActiveForm.ClientSize.Width - videoSourcePlayer1.ClientSize.Width) / 2, (MainWindow.ActiveForm.ClientSize.Height - videoSourcePlayer1.ClientSize.Height) / 2);
-                }
-                if (DisplaySizeComboBox.SelectedIndex == 4)
-                {
-                    int test = (MainWindow.ActiveForm.ClientSize.Width / 4) * 3;
-                    if (test > MainWindow.ActiveForm.ClientSize.Height)
-                    {
-                        test = (MainWindow.ActiveForm.ClientSize.Height / 3) * 4;
-                        videoSourcePlayer1.Size = new Size(test, MainWindow.ActiveForm.ClientSize.Height);
-                    }
-                    else
-                    {
-                        videoSourcePlayer1.Size = new Size(MainWindow.ActiveForm.ClientSize.Width, test);
-                    }
-                    videoSourcePlayer1.Location = new Point((MainWindow.ActiveForm.ClientSize.Width - videoSourcePlayer1.ClientSize.Width) / 2, (MainWindow.ActiveForm.ClientSize.Height - videoSourcePlayer1.ClientSize.Height) / 2);
-                }
-                change = true;
-                pictureBox1.Location = videoSourcePlayer1.Location;
-                pictureBox1.Size = videoSourcePlayer1.Size;
-                pictureBox1.Dock = videoSourcePlayer1.Dock;
-                change = false;
+                AutoSize = false;
+                videoSourcePlayer1.Location = new Point((ClientSize.Width - videoSourcePlayer1.ClientSize.Width) / 2, (ClientSize.Height - videoSourcePlayer1.ClientSize.Height) / 2);
+                AutoSize = true;
             }
+            if (DisplaySizeComboBox.SelectedIndex == 2)
+            {
+                int test = (ClientSize.Width / 16) * 9;
+                if (test > ClientSize.Height)
+                {
+                    test = (ClientSize.Height / 9) * 16;
+                    videoSourcePlayer1.Size = new Size(test, ClientSize.Height);
+                }
+                else
+                {
+                    videoSourcePlayer1.Size = new Size(ClientSize.Width, test);
+                }
+                videoSourcePlayer1.Location = new Point((ClientSize.Width - videoSourcePlayer1.ClientSize.Width) / 2, (ClientSize.Height - videoSourcePlayer1.ClientSize.Height) / 2);
+            }
+            if (DisplaySizeComboBox.SelectedIndex == 3)
+            {
+                int test = (ClientSize.Width / 16) * 10;
+                if (test >ClientSize.Height)
+                {
+                    test = (ClientSize.Height / 10) * 16;
+                    videoSourcePlayer1.Size = new Size(test, ClientSize.Height);
+                }
+                else
+                {
+                    videoSourcePlayer1.Size = new Size(ClientSize.Width, test);
+                }
+                videoSourcePlayer1.Location = new Point((ClientSize.Width - videoSourcePlayer1.ClientSize.Width) / 2, (ClientSize.Height - videoSourcePlayer1.ClientSize.Height) / 2);
+            }
+            if (DisplaySizeComboBox.SelectedIndex == 4)
+            {
+                int test = (ClientSize.Width / 4) * 3;
+                if (test > ClientSize.Height)
+                {
+                    test = (ClientSize.Height / 3) * 4;
+                    videoSourcePlayer1.Size = new Size(test, ClientSize.Height);
+                }
+                else
+                {
+                    videoSourcePlayer1.Size = new Size(ClientSize.Width, test);
+                }
+                videoSourcePlayer1.Location = new Point((ClientSize.Width - videoSourcePlayer1.ClientSize.Width) / 2, (ClientSize.Height - videoSourcePlayer1.ClientSize.Height) / 2);
+            }
+            change = true;
+            pictureBox1.Location = videoSourcePlayer1.Location;
+            pictureBox1.Size = videoSourcePlayer1.Size;
+            pictureBox1.Dock = videoSourcePlayer1.Dock;
+            pictureBox2.Location = videoSourcePlayer1.Location;
+            pictureBox2.Size = videoSourcePlayer1.Size;
+            pictureBox2.Dock = videoSourcePlayer1.Dock;
+            change = false;
         }
 
         private void MainWindow_ResizeEnd(object sender, EventArgs e)
@@ -497,7 +508,7 @@ namespace CaptureDisplay
         {
             if (e.KeyCode == Keys.Escape)
             {
-                MainWindow.ActiveForm.Close();
+                Close();
             }
             if (e.KeyCode == Keys.F)
             {
@@ -514,7 +525,7 @@ namespace CaptureDisplay
         {
             if (e.KeyCode == Keys.Escape)
             {
-                MainWindow.ActiveForm.Close();
+                Close();
             }
             if (e.KeyCode == Keys.F)
             {
