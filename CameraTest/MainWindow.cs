@@ -352,65 +352,67 @@ namespace CaptureDisplay
       UpdateDisplayMode();
     }
 
-    void UpdateDisplayMode()
-    {
-      if (DisplaySizeComboBox.SelectedIndex != -1 && RenderSizeComboBox.SelectedIndex != -1)
-      {
-        bool Test = false;
-        if (WindowState == FormWindowState.Maximized && !FullscreenBool)
+        void UpdateDisplayMode()
         {
-          Test = true;
-        }
-        if (DisplaySizeComboBox.SelectedIndex == 0)
-        {
-          FormBorderStyle = FormBorderStyle.FixedSingle;
-          AutoSize = true;
-          if (captureDevice != null)
-          {
-            videoSourcePlayer1.Dock = DockStyle.None;
-            ClientSize = new Size(captureDevice.VideoCapabilities[RenderSizeComboBox.SelectedIndex].FrameSize.Width, captureDevice.VideoCapabilities[RenderSizeComboBox.SelectedIndex].FrameSize.Height);
-            videoSourcePlayer1.ClientSize = new Size(captureDevice.VideoCapabilities[RenderSizeComboBox.SelectedIndex].FrameSize.Width, captureDevice.VideoCapabilities[RenderSizeComboBox.SelectedIndex].FrameSize.Height);
-          }
-        }
-        if (DisplaySizeComboBox.SelectedIndex == 1)
-        {
-          AutoSize = false;
-          FormBorderStyle = FormBorderStyle.Sizable;
-          videoSourcePlayer1.Dock = DockStyle.Fill;
-        }
-        if (DisplaySizeComboBox.SelectedIndex == 2)
-        {
-          AutoSize = false;
-          FormBorderStyle = FormBorderStyle.Sizable;
-          videoSourcePlayer1.Dock = DockStyle.None;
-        }
-        if (DisplaySizeComboBox.SelectedIndex == 3)
-        {
-          AutoSize = false;
-          FormBorderStyle = FormBorderStyle.Sizable;
-          videoSourcePlayer1.Dock = DockStyle.None;
-        }
-        if (DisplaySizeComboBox.SelectedIndex == 4)
-        {
-          AutoSize = false;
-          FormBorderStyle = FormBorderStyle.Sizable;
-          videoSourcePlayer1.Dock = DockStyle.None;
-        }
-        SizeObjectsScale();
-        if (FullscreenBool)
-        {
-          FormBorderStyle = FormBorderStyle.None;
-          WindowState = FormWindowState.Maximized;
-        }
-        else
-        {
-          if (!Test)
-          {
-            WindowState = FormWindowState.Normal;
-          }
-        }
-      }
-    }
+            if (DisplaySizeComboBox.SelectedIndex != -1 && RenderSizeComboBox.SelectedIndex != -1)
+            {
+                bool Test = false;
+                if (WindowState == FormWindowState.Maximized && !FullscreenBool)
+                {
+                    Test = true;
+                }
+                if (DisplaySizeComboBox.SelectedIndex == 0)
+                {
+                    FormBorderStyle = FormBorderStyle.FixedSingle;
+                    AutoSize = true;
+                    if (captureDevice != null)
+                    {
+                        videoSourcePlayer1.Dock = DockStyle.None;
+                        ClientSize = new Size(captureDevice.VideoCapabilities[RenderSizeComboBox.SelectedIndex].FrameSize.Width, captureDevice.VideoCapabilities[RenderSizeComboBox.SelectedIndex].FrameSize.Height);
+                        videoSourcePlayer1.ClientSize = new Size(captureDevice.VideoCapabilities[RenderSizeComboBox.SelectedIndex].FrameSize.Width, captureDevice.VideoCapabilities[RenderSizeComboBox.SelectedIndex].FrameSize.Height);
+                    }
+                }
+                if (DisplaySizeComboBox.SelectedIndex == 1)
+                {
+                    AutoSize = false;
+                    FormBorderStyle = FormBorderStyle.Sizable;
+                    videoSourcePlayer1.Dock = DockStyle.Fill;
+                }
+                if (DisplaySizeComboBox.SelectedIndex == 2)
+                {
+                    AutoSize = false;
+                    FormBorderStyle = FormBorderStyle.Sizable;
+                    videoSourcePlayer1.Dock = DockStyle.None;
+                }
+                if (DisplaySizeComboBox.SelectedIndex == 3)
+                {
+                    AutoSize = false;
+                    FormBorderStyle = FormBorderStyle.Sizable;
+                    videoSourcePlayer1.Dock = DockStyle.None;
+                }
+                if (DisplaySizeComboBox.SelectedIndex == 4)
+                {
+                    AutoSize = false;
+                    FormBorderStyle = FormBorderStyle.Sizable;
+                    videoSourcePlayer1.Dock = DockStyle.None;
+                }
+                SizeObjectsScale();
+                if (FullscreenBool)
+                {
+                    ClientSize = new Size(1280, 780);
+                    WindowState = FormWindowState.Normal;
+                    FormBorderStyle = FormBorderStyle.None;
+                    WindowState = FormWindowState.Maximized;
+                }
+                else
+                {
+                    if (!Test)
+                    {
+                        WindowState = FormWindowState.Normal;
+                    }
+                }
+            }
+        }{
 
     private void Fullscreen_Click(object sender, EventArgs e)
     {
