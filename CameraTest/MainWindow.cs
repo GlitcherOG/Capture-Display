@@ -399,7 +399,6 @@ namespace CaptureDisplay
         SizeObjectsScale();
         if (FullscreenBool)
         {
-          WindowState = FormWindowState.Normal;
           FormBorderStyle = FormBorderStyle.None;
           WindowState = FormWindowState.Maximized;
         }
