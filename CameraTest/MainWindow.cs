@@ -369,7 +369,7 @@ namespace CaptureDisplay
                     {
                         videoSourcePlayer1.Dock = DockStyle.None;
                         ClientSize = new Size(captureDevice.VideoCapabilities[RenderSizeComboBox.SelectedIndex].FrameSize.Width, captureDevice.VideoCapabilities[RenderSizeComboBox.SelectedIndex].FrameSize.Height);
-                        videoSourcePlayer1.ClientSize = new Size(captureDevice.VideoCapabilities[RenderSizeComboBox.SelectedIndex].FrameSize.Width, captureDevice.VideoCapabilities[RenderSizeComboBox.SelectedIndex].FrameSize.Height);
+                        videoSourcePlayer1.Size = new Size(captureDevice.VideoCapabilities[RenderSizeComboBox.SelectedIndex].FrameSize.Width, captureDevice.VideoCapabilities[RenderSizeComboBox.SelectedIndex].FrameSize.Height);
                     }
                 }
                 if (DisplaySizeComboBox.SelectedIndex == 1)
