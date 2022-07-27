@@ -475,17 +475,12 @@ namespace CaptureDisplay
         videoSourcePlayer1.Location = new Point((ClientSize.Width - videoSourcePlayer1.ClientSize.Width) / 2, (ClientSize.Height - videoSourcePlayer1.ClientSize.Height) / 2);
       }
       change = true;
-      AutoSize = false;
       pictureBox1.Location = videoSourcePlayer1.Location;
       pictureBox1.Size = videoSourcePlayer1.Size;
       pictureBox1.Dock = videoSourcePlayer1.Dock;
       pictureBox2.Location = videoSourcePlayer1.Location;
       pictureBox2.Size = videoSourcePlayer1.Size;
       pictureBox2.Dock = videoSourcePlayer1.Dock;
-      if (DisplaySizeComboBox.SelectedIndex == 0)
-      {
-        AutoSize = true;
-      }
       change = false;
     }
 
