@@ -51,8 +51,7 @@ namespace CaptureDisplay
             pictureBox2.Dock = DockStyle.Fill;
             FPSCount = false;
             FPSCounter.Visible = FPSCount;
-            //RenderModeComboBox.SelectedIndex = 0;
-            //DisplaySizeComboBox.SelectedIndex = 0;
+            DisableSleep.KeepAwake();
         }
 
         bool Loading;
