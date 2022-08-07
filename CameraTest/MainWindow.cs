@@ -25,7 +25,7 @@ namespace CaptureDisplay
         private delegate void SafeCallDelegate();
         DateTimeOffset dateTime;
         double Count = 0;
-        bool change;
+        bool RACCheck;
         bool FPSCount = true;
         private WasapiCapture wave;
         private WasapiOut waveOut;
@@ -209,6 +209,7 @@ namespace CaptureDisplay
         #region Frame Update
         private void CaptureDevice_NewFrame(object sender, NewFrameEventArgs eventArgs)
         {
+            DisableSleep.KeepAwake();
             if (dateTime == null)
             {
                 dateTime = DateTimeOffset.Now;
@@ -219,8 +220,9 @@ namespace CaptureDisplay
             Count = tempCount;
             dateTime = temp;
 
-            if (!change)
+            if (!RACCheck)
             {
+                //RACCheck=true;
                 try
                 {
                     if (settings.RenderMode == 1)
@@ -238,12 +240,14 @@ namespace CaptureDisplay
                 {
 
                 }
+                //RACCheck = false;
             }
             GC.Collect();
         }
 
         private void VideoSourcePlayer_NewFrame(object sender, ref Bitmap test)
         {
+            DisableSleep.KeepAwake();
             if (dateTime == null)
             {
                 dateTime = DateTimeOffset.Now;
@@ -354,6 +358,11 @@ namespace CaptureDisplay
 
         void UpdateDisplayMode()
         {
+            //if(RACCheck)
+            //{
+
+            //}
+            RACCheck = true;
             if (DisplaySizeComboBox.SelectedIndex != -1 && RenderSizeComboBox.SelectedIndex != -1)
             {
                 bool Test = false;
@@ -396,6 +405,7 @@ namespace CaptureDisplay
                     FormBorderStyle = FormBorderStyle.Sizable;
                     videoSourcePlayer1.Dock = DockStyle.None;
                 }
+                RACCheck = false;
                 SizeObjectsScale();
                 if (FullscreenBool)
                 {
@@ -426,6 +436,11 @@ namespace CaptureDisplay
 
         void SizeObjectsScale()
         {
+            //while (RACCheck)
+            {
+
+            }
+            RACCheck = true;
             if (DisplaySizeComboBox.SelectedIndex == 0)
             {
                 AutoSize = false;
@@ -474,14 +489,13 @@ namespace CaptureDisplay
                 }
                 videoSourcePlayer1.Location = new Point((ClientSize.Width - videoSourcePlayer1.ClientSize.Width) / 2, (ClientSize.Height - videoSourcePlayer1.ClientSize.Height) / 2);
             }
-            change = true;
             pictureBox1.Location = videoSourcePlayer1.Location;
             pictureBox1.Size = videoSourcePlayer1.Size;
             pictureBox1.Dock = videoSourcePlayer1.Dock;
             pictureBox2.Location = videoSourcePlayer1.Location;
             pictureBox2.Size = videoSourcePlayer1.Size;
             pictureBox2.Dock = videoSourcePlayer1.Dock;
-            change = false;
+            RACCheck = false;
         }
 
         private void MainWindow_ResizeEnd(object sender, EventArgs e)
