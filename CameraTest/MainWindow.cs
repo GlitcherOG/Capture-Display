@@ -21,22 +21,29 @@ namespace CaptureDisplay
 	public partial class MainWindow : Form
 	{
 		public static Settings settings;
-		FilterInfoCollection infoCollection;
 		VideoCaptureDevice captureDevice;
+
+		FilterInfoCollection infoCollection;
 		private delegate void SafeCallDelegate();
+
 		DateTimeOffset dateTime;
-		double Count = 0;
-		bool RACCheck;
-		bool FPSCount = true;
+		double Count = 0; // Time counter
+
 		private WasapiCapture wave;
 		private WasapiOut waveOut;
 		private BufferedWaveProvider provider;
-		bool FullscreenBool;
+
+		bool showFPS = true;
+		bool isFullscreen;
+
 		public static Size size;
 		public static Point point;
 		public static DockStyle dockStyle;
 
-		bool QuickFix;
+		bool RACCheck; // Resize and Change check, to disable framedrawing when modes or sizes are being set
+		bool QuickFix; // Patch bool to fix a thing, best left untouched
+
+		bool isDrawing;
 
 		public MainWindow()
 		{
@@ -52,12 +59,13 @@ namespace CaptureDisplay
 			pictureBox1.Dock = DockStyle.Fill;
 			pictureBox2.Dock = DockStyle.Fill;
 
-			FPSCount = false;
-			FPSCounter.Visible = FPSCount;
+			showFPS = false;
+			FPSCounter.Visible = showFPS;
 
 			DisableSleep.KeepAwake();
 		}
 
+		#region Settings
 		bool Loading;
 		void LoadSettings()
 		{
@@ -76,8 +84,6 @@ namespace CaptureDisplay
 			}
 			Loading = false;
 		}
-
-
 		void SetSettings()
 		{
 			if (!Loading)
@@ -97,21 +103,19 @@ namespace CaptureDisplay
 				settings.Save(Application.UserAppDataPath);
 			}
 		}
+		#endregion
 
+		#region Form Opening and Closing
 		private void Form1_Load(object sender, EventArgs e)
 		{
 			infoCollection = new FilterInfoCollection(FilterCategory.VideoInputDevice);
 			foreach (FilterInfo item in infoCollection)
-			{
 				VideoComboBox.Items.Add(item.Name);
-			}
 
 			MMDeviceEnumerator enumerator = new MMDeviceEnumerator();
 			var captureDevices = enumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active).ToArray();
 			for (int i = 0; i < captureDevices.Length; i++)
-			{
 				AudioComboBox.Items.Add(captureDevices[i].FriendlyName);
-			}
 
 			LoadSettings();
 
@@ -130,7 +134,7 @@ namespace CaptureDisplay
 					waveOut.Stop();
 				}
 
-				FPSCount = false;
+				showFPS = false;
 
 				if (captureDevice.IsRunning)
 				{
@@ -138,9 +142,12 @@ namespace CaptureDisplay
 					captureDevice.WaitForStop();
 				}
 			}
-			Environment.Exit(0);
+
+			Environment.ExitCode = 1;
+			Application.Exit();
 			captureDevice = null;
 		}
+		#endregion
 
 		private void VideoComboBox_SelectedIndexChanged(object sender, EventArgs e)
 		{
@@ -230,16 +237,22 @@ namespace CaptureDisplay
 				//RACCheck=true;
 				try
 				{
+					if (isDrawing)
+					{
+						Console.WriteLine("Tried drawing a frame while another was in progress.");
+					}
+					//if(isDrawing) return;
+
+					isDrawing = true;
+
+					Bitmap bitmap = (Bitmap)eventArgs.Frame.Clone();
+
 					if (settings.RenderMode == 1)
-					{
-						Bitmap bitmap = (Bitmap)eventArgs.Frame.Clone();
-						pictureBox1.Image = bitmap;
-					}
+						SetImageThreadSafe(pictureBox1, bitmap);
 					else if (settings.RenderMode == 2)
-					{
-						Bitmap bitmap = (Bitmap)eventArgs.Frame.Clone();
-						pictureBox2.Image = bitmap;
-					}
+						SetImageThreadSafe(pictureBox2, bitmap);
+
+					isDrawing = false;
 				}
 				catch
 				{
@@ -248,6 +261,27 @@ namespace CaptureDisplay
 				//RACCheck = false;
 			}
 			GC.Collect();
+		}
+
+		/// <summary>
+		/// Attempts to set the image in a more threadsafe manner.<br>
+		/// Thanks to https://stackoverflow.com/a/61602970
+		/// </summary>
+		/// <param name="pb"></param>
+		/// <param name="img"></param>
+		void SetImageThreadSafe(PictureBox pb, Image img)
+		{
+			if (pb.InvokeRequired)
+			{
+				BeginInvoke((Action)delegate
+				{
+					SetImageThreadSafe(pb, img);
+				});
+				return;
+			}
+
+			pb.Image?.Dispose();
+			pb.Image = img;
 		}
 
 		private void VideoSourcePlayer_NewFrame(object sender, ref Bitmap test)
@@ -268,9 +302,9 @@ namespace CaptureDisplay
 			while (true)
 			{
 				Thread.Sleep(1000);
-				if (FPSCount)
+				if (showFPS)
 				{
-					MethodInvoker inv = delegate 
+					MethodInvoker inv = delegate
 					{
 						this.FPSCounter.Text = $"FPS: {Math.Round((1f / Count), 2)}";
 					};
@@ -334,14 +368,14 @@ namespace CaptureDisplay
 			{
 				if (captureDevice != null)
 				{
-					var tempFPS = FPSCount;
-					FPSCount = false;
+					var tempFPS = showFPS;
+					showFPS = false;
 					captureDevice.SignalToStop();
 					captureDevice.WaitForStop();
 					captureDevice.VideoResolution = captureDevice.VideoCapabilities[RenderSizeComboBox.SelectedIndex];
 					UpdateDisplayMode();
 					captureDevice.Start();
-					FPSCount = tempFPS;
+					showFPS = tempFPS;
 					SetSettings();
 				}
 			}
@@ -356,24 +390,26 @@ namespace CaptureDisplay
 
 		void ToggleFPS()
 		{
-			FPSCount = !FPSCount;
-			FPSCounter.Visible = FPSCount;
+			showFPS = !showFPS;
+			FPSCounter.Visible = showFPS;
 		}
 		void ToggleFullscreen()
 		{
-			FullscreenBool = !FullscreenBool;
+			isFullscreen = !isFullscreen;
 			UpdateDisplayMode();
 		}
 
 		void UpdateDisplayMode()
 		{
+			isDrawing = false; // Attempt to avoid clashing with drawcheck in rare race condition
+
 			int displayIndex = DisplaySizeComboBox.SelectedIndex;
 
 			RACCheck = true;
 			if (displayIndex != -1 && RenderSizeComboBox.SelectedIndex != -1)
 			{
 				bool Test = false;
-				if (WindowState == FormWindowState.Maximized && !FullscreenBool)
+				if (WindowState == FormWindowState.Maximized && !isFullscreen)
 					Test = true;
 
 				switch (displayIndex)
@@ -397,17 +433,17 @@ namespace CaptureDisplay
 						videoSourcePlayer1.Dock = DockStyle.Fill;
 						break;
 					case 2: // Cases 2, 3, and 4 were identical
-					case 3:	// So every case will just collapse
-					case 4:	// And do the same thing at the end
+					case 3: // So every case will just collapse
+					case 4: // And do the same thing at the end
 						AutoSize = false;
 						FormBorderStyle = FormBorderStyle.Sizable;
 						videoSourcePlayer1.Dock = DockStyle.None;
 						break;
 				}
-			
+
 				RACCheck = false;
 				SizeObjectsScale();
-				if (FullscreenBool)
+				if (isFullscreen)
 				{
 					WindowState = FormWindowState.Normal;
 					FormBorderStyle = FormBorderStyle.None;
@@ -454,7 +490,7 @@ namespace CaptureDisplay
 				case 1:
 					break;
 				case 2: // Cases 2, 3, and 4 are functionally identical, just with different values. 
-				case 3:	// These values are stored in the ratios array that is used
+				case 3: // These values are stored in the ratios array that is used
 				case 4: // Riiight here ----v
 					Vector2 displayRatio = ratios[displayIndex];
 
@@ -463,6 +499,7 @@ namespace CaptureDisplay
 						test = (int)((clientHeight / displayRatio.Y) * displayRatio.X);
 
 					videoSourcePlayer1.Size = test > clientHeight ? new Size(test, clientHeight) : new Size(clientWidth, test);
+								
 					videoSourcePlayer1.Location = new Point((clientWidth - playerWidth) / 2, (clientHeight - playerHeight) / 2);
 					break;
 			}
@@ -515,7 +552,7 @@ namespace CaptureDisplay
 			if (e.Button == MouseButtons.Left)
 			{
 				ToggleFullscreen();
-				toolStrip2.Visible = !FullscreenBool;
+				toolStrip2.Visible = !isFullscreen;
 			}
 		}
 		#endregion
