@@ -207,11 +207,13 @@
             // 
             this.FPSCounter.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.FPSCounter.AutoSize = true;
-            this.FPSCounter.BackColor = System.Drawing.SystemColors.ControlLightLight;
+            this.FPSCounter.BackColor = System.Drawing.Color.Transparent;
+            this.FPSCounter.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.FPSCounter.Font = new System.Drawing.Font("Microsoft Sans Serif", 26.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.FPSCounter.ForeColor = System.Drawing.Color.White;
             this.FPSCounter.Location = new System.Drawing.Point(12, 633);
             this.FPSCounter.Name = "FPSCounter";
-            this.FPSCounter.Size = new System.Drawing.Size(122, 39);
+            this.FPSCounter.Size = new System.Drawing.Size(124, 41);
             this.FPSCounter.TabIndex = 5;
             this.FPSCounter.Text = "FPS: 0";
             // 
@@ -259,11 +261,13 @@
             // HotKeyDisplay
             // 
             this.HotKeyDisplay.AutoSize = true;
-            this.HotKeyDisplay.BackColor = System.Drawing.SystemColors.ControlLightLight;
+            this.HotKeyDisplay.BackColor = System.Drawing.Color.Black;
+            this.HotKeyDisplay.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.HotKeyDisplay.Font = new System.Drawing.Font("Microsoft Sans Serif", 21.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.HotKeyDisplay.ForeColor = System.Drawing.Color.White;
             this.HotKeyDisplay.Location = new System.Drawing.Point(12, 25);
             this.HotKeyDisplay.Name = "HotKeyDisplay";
-            this.HotKeyDisplay.Size = new System.Drawing.Size(63, 33);
+            this.HotKeyDisplay.Size = new System.Drawing.Size(65, 35);
             this.HotKeyDisplay.TabIndex = 10;
             this.HotKeyDisplay.Text = "???";
             this.HotKeyDisplay.Visible = false;
@@ -272,7 +276,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.BackColor = System.Drawing.Color.Black;
             this.ClientSize = new System.Drawing.Size(1264, 681);
             this.Controls.Add(this.HotKeyDisplay);
             this.Controls.Add(this.FPSCounter);
@@ -280,6 +284,7 @@
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.videoSourcePlayer1);
             this.Controls.Add(this.pictureBox2);
+            this.ForeColor = System.Drawing.Color.Black;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "DisplayLabel";

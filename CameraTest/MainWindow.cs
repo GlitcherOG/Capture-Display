@@ -552,7 +552,10 @@ namespace CaptureDisplay
 				Close();
 
 			if (e == Keys.F)
+			{
 				ToggleFullscreen();
+				InvokeDisplayLabel("Toggled Fullscreen...");
+			}
 
 			if (e == Keys.C)
 				ToggleFPS();
