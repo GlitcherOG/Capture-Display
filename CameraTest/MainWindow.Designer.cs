@@ -1,6 +1,6 @@
 ﻿namespace CaptureDisplay
 {
-    partial class MainWindow
+    partial class DisplayLabel
     {
         /// <summary>
         /// Required designer variable.
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DisplayLabel));
             this.toolStrip2 = new System.Windows.Forms.ToolStrip();
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             this.VideoComboBox = new System.Windows.Forms.ToolStripComboBox();
@@ -50,6 +50,7 @@
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.videoSourcePlayer1 = new Accord.Controls.VideoSourcePlayer();
             this.pictureBox2 = new Accord.Controls.PictureBox();
+            this.HotKeyDisplay = new System.Windows.Forms.Label();
             this.toolStrip2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
@@ -238,8 +239,8 @@
             this.videoSourcePlayer1.TabIndex = 8;
             this.videoSourcePlayer1.Text = "videoSourcePlayer1";
             this.videoSourcePlayer1.VideoSource = null;
-            this.videoSourcePlayer1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseDoubleClick);
             this.videoSourcePlayer1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.videoSourcePlayer1_KeyDown);
+            this.videoSourcePlayer1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseDoubleClick);
             this.videoSourcePlayer1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseDown);
             // 
             // pictureBox2
@@ -255,12 +256,25 @@
             this.pictureBox2.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseDoubleClick);
             this.pictureBox2.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseDown);
             // 
-            // MainWindow
+            // HotKeyDisplay
+            // 
+            this.HotKeyDisplay.AutoSize = true;
+            this.HotKeyDisplay.BackColor = System.Drawing.SystemColors.ControlLightLight;
+            this.HotKeyDisplay.Font = new System.Drawing.Font("Microsoft Sans Serif", 21.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.HotKeyDisplay.Location = new System.Drawing.Point(12, 25);
+            this.HotKeyDisplay.Name = "HotKeyDisplay";
+            this.HotKeyDisplay.Size = new System.Drawing.Size(63, 33);
+            this.HotKeyDisplay.TabIndex = 10;
+            this.HotKeyDisplay.Text = "???";
+            this.HotKeyDisplay.Visible = false;
+            // 
+            // DisplayLabel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.ClientSize = new System.Drawing.Size(1264, 681);
+            this.Controls.Add(this.HotKeyDisplay);
             this.Controls.Add(this.FPSCounter);
             this.Controls.Add(this.toolStrip2);
             this.Controls.Add(this.pictureBox1);
@@ -268,7 +282,7 @@
             this.Controls.Add(this.pictureBox2);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Name = "MainWindow";
+            this.Name = "DisplayLabel";
             this.Text = "Capture Display";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.ResizeEnd += new System.EventHandler(this.MainWindow_ResizeEnd);
@@ -306,6 +320,7 @@
         private System.Windows.Forms.PictureBox pictureBox1;
         private Accord.Controls.VideoSourcePlayer videoSourcePlayer1;
         private Accord.Controls.PictureBox pictureBox2;
+        private System.Windows.Forms.Label HotKeyDisplay;
     }
 }
 

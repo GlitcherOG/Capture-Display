@@ -18,7 +18,7 @@ using System.Numerics;
 
 namespace CaptureDisplay
 {
-	public partial class MainWindow : Form
+	public partial class DisplayLabel : Form
 	{
 		public static Settings settings;
 		VideoCaptureDevice captureDevice;
@@ -45,7 +45,7 @@ namespace CaptureDisplay
 
 		bool isDrawing;
 
-		public MainWindow()
+		public DisplayLabel()
 		{
 			Closed += Form1_Closed;
 			settings = Settings.Load(Application.UserAppDataPath);
@@ -561,13 +561,45 @@ namespace CaptureDisplay
 			{
 				InitalizeCamera();
 				AudioCapture();
+				InvokeDisplayLabel("Reinitialsed Inputs...");
 			}
 
 			if(e == Keys.Q)
             {
 				GetDevicesLists(true);
+				InvokeDisplayLabel("Refreshed Inputs...");
 			}
 		}
+
+		void InvokeDisplayLabel(string Input)
+        {
+			DisplayLabelString = Input;
+			Thread thread1 = new Thread(UpdateDisplayLabel);
+			thread1.Start();
+		}
+
+		string DisplayLabelString;
+		void UpdateDisplayLabel()
+		{
+			string Input = DisplayLabelString;
+			MethodInvoker inv = delegate
+			{
+				HotKeyDisplay.Visible = true;
+				HotKeyDisplay.Text = Input;
+			};
+
+			this.Invoke(inv);
+            Thread.Sleep(3000);
+			if (DisplayLabelString == Input)
+			{
+				MethodInvoker inv1 = delegate
+				{
+					HotKeyDisplay.Visible = false;
+				};
+				DisplayLabelString = "";
+				this.Invoke(inv1);
+			}
+        }
 
 		// These two now pass their keycodes to the above function, so all hotKEYs are now centralised.
 		private void videoSourcePlayer1_KeyDown(object sender, KeyEventArgs e) => HotKeyGroup(e.KeyCode);
