@@ -108,14 +108,7 @@ namespace CaptureDisplay
 		#region Form Opening and Closing
 		private void Form1_Load(object sender, EventArgs e)
 		{
-			infoCollection = new FilterInfoCollection(FilterCategory.VideoInputDevice);
-			foreach (FilterInfo item in infoCollection)
-				VideoComboBox.Items.Add(item.Name);
-
-			MMDeviceEnumerator enumerator = new MMDeviceEnumerator();
-			var captureDevices = enumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active).ToArray();
-			for (int i = 0; i < captureDevices.Length; i++)
-				AudioComboBox.Items.Add(captureDevices[i].FriendlyName);
+			GetDevicesLists();
 
 			LoadSettings();
 
@@ -148,6 +141,36 @@ namespace CaptureDisplay
 			captureDevice = null;
 		}
 		#endregion
+
+		void GetDevicesLists(bool SetLast = false)
+		{
+			string VideoDevice = VideoComboBox.Text;
+			string AudioDevice = AudioComboBox.Text;
+
+			VideoComboBox.Items.Clear();
+			AudioComboBox.Items.Clear();
+
+			infoCollection = new FilterInfoCollection(FilterCategory.VideoInputDevice);
+			foreach (FilterInfo item in infoCollection)
+				VideoComboBox.Items.Add(item.Name);
+
+			MMDeviceEnumerator enumerator = new MMDeviceEnumerator();
+			var captureDevices = enumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active).ToArray();
+			for (int i = 0; i < captureDevices.Length; i++)
+				AudioComboBox.Items.Add(captureDevices[i].FriendlyName);
+
+			if (SetLast)
+			{
+				if (VideoComboBox.Items.Contains(VideoDevice))
+				{
+					VideoComboBox.SelectedIndex = VideoComboBox.Items.IndexOf(VideoDevice);
+				}
+				if (AudioComboBox.Items.Contains(AudioDevice))
+				{
+					AudioComboBox.SelectedIndex = AudioComboBox.Items.IndexOf(AudioDevice);
+				}
+			}
+		}
 
 		private void VideoComboBox_SelectedIndexChanged(object sender, EventArgs e)
 		{
@@ -234,7 +257,6 @@ namespace CaptureDisplay
 
 			if (!RACCheck)
 			{
-				//RACCheck=true;
 				try
 				{
 					if (isDrawing)
@@ -258,7 +280,6 @@ namespace CaptureDisplay
 				{
 
 				}
-				//RACCheck = false;
 			}
 			GC.Collect();
 		}
@@ -540,6 +561,11 @@ namespace CaptureDisplay
 			{
 				InitalizeCamera();
 				AudioCapture();
+			}
+
+			if(e == Keys.Q)
+            {
+				GetDevicesLists(true);
 			}
 		}
 
