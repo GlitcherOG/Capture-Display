@@ -135,10 +135,10 @@ namespace CaptureDisplay
 					captureDevice.WaitForStop();
 				}
 			}
-
+			captureDevice = null;
+			wave = null;
 			Environment.ExitCode = 1;
 			Application.Exit();
-			captureDevice = null;
 		}
 		#endregion
 
@@ -172,7 +172,8 @@ namespace CaptureDisplay
 			}
 		}
 
-		private void VideoComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        #region Vidoe
+        private void VideoComboBox_SelectedIndexChanged(object sender, EventArgs e)
 		{
 			if (VideoComboBox.SelectedIndex != -1)
 			{
@@ -241,9 +242,10 @@ namespace CaptureDisplay
 				}
 			}
 		}
+        #endregion
 
-		#region Frame Update
-		private void CaptureDevice_NewFrame(object sender, NewFrameEventArgs eventArgs)
+        #region Frame Update
+        private void CaptureDevice_NewFrame(object sender, NewFrameEventArgs eventArgs)
 		{
 			DisableSleep.KeepAwake();
 			if (dateTime == null)
@@ -333,52 +335,6 @@ namespace CaptureDisplay
 					this.Invoke(inv);
 				}
 			}
-		}
-		#endregion
-
-		#region Audio
-		void AudioCapture()
-		{
-			if (wave != null)
-			{
-				wave.StopRecording();
-				waveOut.Stop();
-			}
-			MMDeviceEnumerator enumerator = new MMDeviceEnumerator();
-			var temp = enumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active);
-
-			var Temp2 = temp[AudioComboBox.SelectedIndex];
-			wave = new WasapiCapture(Temp2, true);
-			wave.ShareMode = AudioClientShareMode.Shared;
-			//wave.WaveFormat = new WaveFormat(40000, 16, 1);
-
-			waveOut = new WasapiOut();
-
-			provider = new BufferedWaveProvider(wave.WaveFormat);
-
-			waveOut.Init(provider);
-			waveOut.Play();
-
-			wave.DataAvailable += Wave_DataAvailable;
-			wave.StartRecording();
-			SetSettings();
-		}
-		private void AudioComboBox_SelectedIndexChanged(object sender, EventArgs e)
-		{
-			if (AudioComboBox.SelectedIndex != -1)
-			{
-				if (wave != null)
-				{
-					wave.StopRecording();
-					waveOut.Stop();
-				}
-				AudioCapture();
-			}
-		}
-
-		private void Wave_DataAvailable(object sender, WaveInEventArgs e)
-		{
-			provider.AddSamples(e.Buffer, 0, e.BytesRecorded);
 		}
 		#endregion
 
@@ -542,6 +498,52 @@ namespace CaptureDisplay
 				SetSettings();
 				InitalizeCamera();
 			}
+		}
+		#endregion
+
+		#region Audio
+		void AudioCapture()
+		{
+			if (wave != null)
+			{
+				wave.StopRecording();
+				waveOut.Stop();
+			}
+			MMDeviceEnumerator enumerator = new MMDeviceEnumerator();
+			var temp = enumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active);
+
+			var Temp2 = temp[AudioComboBox.SelectedIndex];
+			wave = new WasapiCapture(Temp2, true);
+			wave.ShareMode = AudioClientShareMode.Shared;
+			//wave.WaveFormat = new WaveFormat(40000, 16, 1);
+
+			waveOut = new WasapiOut();
+
+			provider = new BufferedWaveProvider(wave.WaveFormat);
+
+			waveOut.Init(provider);
+			waveOut.Play();
+
+			wave.DataAvailable += Wave_DataAvailable;
+			wave.StartRecording();
+			SetSettings();
+		}
+		private void AudioComboBox_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			if (AudioComboBox.SelectedIndex != -1)
+			{
+				if (wave != null)
+				{
+					wave.StopRecording();
+					waveOut.Stop();
+				}
+				AudioCapture();
+			}
+		}
+
+		private void Wave_DataAvailable(object sender, WaveInEventArgs e)
+		{
+			provider.AddSamples(e.Buffer, 0, e.BytesRecorded);
 		}
 		#endregion
 
