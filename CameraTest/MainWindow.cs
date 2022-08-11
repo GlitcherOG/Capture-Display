@@ -499,7 +499,7 @@ namespace CaptureDisplay
 						test = (int)((clientHeight / displayRatio.Y) * displayRatio.X);
 
 					videoSourcePlayer1.Size = test > clientHeight ? new Size(test, clientHeight) : new Size(clientWidth, test);
-								
+
 					videoSourcePlayer1.Location = new Point((clientWidth - playerWidth) / 2, (clientHeight - playerHeight) / 2);
 					break;
 			}
@@ -535,6 +535,12 @@ namespace CaptureDisplay
 
 			if (e == Keys.C)
 				ToggleFPS();
+
+			if (e == Keys.R)
+			{
+				InitalizeCamera();
+				AudioCapture();
+			}
 		}
 
 		// These two now pass their keycodes to the above function, so all hotKEYs are now centralised.
