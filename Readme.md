@@ -10,6 +10,8 @@ This project was originally started cause someone else showed me theres and i th
 - F: Toggle Fullscreen
 - Right Click: Toggle Toolbar
 - Double Click: Toggle Fullscreen and Toolbar
+- Q: Refreshes Device Lists
+- R: Restarts Audio And Camera
 
 ## TODO
 - [ ] Overlays and Filters
