@@ -385,10 +385,6 @@ namespace CaptureDisplay
 			RACCheck = true;
 			if (displayIndex != -1 && RenderSizeComboBox.SelectedIndex != -1)
 			{
-				bool Test = false;
-				if (WindowState == FormWindowState.Maximized && !isFullscreen)
-					Test = true;
-
 				switch (displayIndex)
 				{
 					case 0:
@@ -428,8 +424,7 @@ namespace CaptureDisplay
 				}
 				else
 				{
-					if (!Test)
-						WindowState = FormWindowState.Normal;
+					WindowState = FormWindowState.Normal;
 				}
 			}
 		}
