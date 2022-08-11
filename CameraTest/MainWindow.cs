@@ -477,6 +477,9 @@ namespace CaptureDisplay
 
 					videoSourcePlayer1.Size = test > clientHeight ? new Size(test, clientHeight) : new Size(clientWidth, test);
 
+					playerWidth = videoSourcePlayer1.ClientSize.Width;
+					playerHeight = videoSourcePlayer1.ClientSize.Height;
+
 					videoSourcePlayer1.Location = new Point((clientWidth - playerWidth) / 2, (clientHeight - playerHeight) / 2);
 					break;
 			}
