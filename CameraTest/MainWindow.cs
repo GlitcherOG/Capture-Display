@@ -137,8 +137,7 @@ namespace CaptureDisplay
 			}
 			captureDevice = null;
 			wave = null;
-			Environment.ExitCode = 1;
-			Application.Exit();
+			Environment.Exit(1);
 		}
 		#endregion
 
@@ -172,7 +171,7 @@ namespace CaptureDisplay
 			}
 		}
 
-        #region Vidoe
+        #region Video
         private void VideoComboBox_SelectedIndexChanged(object sender, EventArgs e)
 		{
 			if (VideoComboBox.SelectedIndex != -1)
@@ -355,6 +354,8 @@ namespace CaptureDisplay
 					showFPS = tempFPS;
 					SetSettings();
 				}
+
+				SizeObjectsScale();
 			}
 		}
 
@@ -443,39 +444,35 @@ namespace CaptureDisplay
 
 		void SizeObjectsScale()
 		{
-			int displayIndex = DisplaySizeComboBox.SelectedIndex;
-
-			int clientWidth = ClientSize.Width;
-			int clientHeight = ClientSize.Height;
-			int playerWidth = videoSourcePlayer1.ClientSize.Width;
-			int playerHeight = videoSourcePlayer1.ClientSize.Height;
+			int index = DisplaySizeComboBox.SelectedIndex;
 
 			RACCheck = true;
 
-			switch (displayIndex)
+			switch (index)
 			{
 				case 0:
+
 					AutoSize = false;
-					videoSourcePlayer1.Location = new Point((clientWidth - playerWidth) / 2, (clientHeight - playerHeight) / 2);
+					videoSourcePlayer1.Location = new Point((ClientSize.Width - videoSourcePlayer1.ClientSize.Width) / 2, 
+															(ClientSize.Height - videoSourcePlayer1.ClientSize.Height) / 2);
 					AutoSize = true;
-					break;
-				case 1:
 					break;
 				case 2: // Cases 2, 3, and 4 are functionally identical, just with different values. 
 				case 3: // These values are stored in the ratios array that is used
 				case 4: // Riiight here ----v
-					Vector2 displayRatio = ratios[displayIndex];
+					Vector2 displayRatio = ratios[index];
 
-					int test = (int)((clientWidth / displayRatio.X) * displayRatio.Y);
-					if (test > clientHeight)
-						test = (int)((clientHeight / displayRatio.Y) * displayRatio.X);
+					int test = (int)((ClientSize.Width / displayRatio.X) * displayRatio.Y);
+					if (test > ClientSize.Height)
+						test = (int)((ClientSize.Height / displayRatio.Y) * displayRatio.X);
 
-					videoSourcePlayer1.Size = test > clientHeight ? new Size(test, clientHeight) : new Size(clientWidth, test);
+					videoSourcePlayer1.Size = test > ClientSize.Height ? new Size(test, ClientSize.Height) :
+																		new Size(ClientSize.Width, test);
 
-					playerWidth = videoSourcePlayer1.ClientSize.Width;
-					playerHeight = videoSourcePlayer1.ClientSize.Height;
-
-					videoSourcePlayer1.Location = new Point((clientWidth - playerWidth) / 2, (clientHeight - playerHeight) / 2);
+					videoSourcePlayer1.Location = new Point((ClientSize.Width - videoSourcePlayer1.ClientSize.Width) / 2, 
+															(ClientSize.Height - videoSourcePlayer1.ClientSize.Height) / 2);
+					break;
+				default:
 					break;
 			}
 
@@ -548,30 +545,28 @@ namespace CaptureDisplay
 		#region HotKeys
 		void HotKeyGroup(Keys e)
 		{
-			if (e == Keys.Escape)
-				Close();
-
-			if (e == Keys.F)
-			{
-				ToggleFullscreen();
-				InvokeDisplayLabel("Toggled Fullscreen...");
-			}
-
-			if (e == Keys.C)
-				ToggleFPS();
-
-			if (e == Keys.R)
-			{
-				InitalizeCamera();
-				AudioCapture();
-				InvokeDisplayLabel("Reinitialsed Inputs...");
-			}
-
-			if(e == Keys.Q)
+            switch (e)
             {
-				GetDevicesLists(true);
-				InvokeDisplayLabel("Refreshed Inputs...");
-			}
+				case Keys.Escape:
+					Close();
+					break;
+				case Keys.F:
+					ToggleFullscreen();
+					InvokeDisplayLabel("Toggled Fullscreen...");
+					break;
+				case Keys.C:
+					ToggleFPS();
+					break;
+				case Keys.R:
+					InitalizeCamera();
+					AudioCapture();
+					InvokeDisplayLabel("Reinitialised Inputs...");
+					break;
+				case Keys.Q:
+					GetDevicesLists(true);
+					InvokeDisplayLabel("Refreshed Input List...");
+					break;
+            }
 		}
 
 		void InvokeDisplayLabel(string Input)
