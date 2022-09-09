@@ -1,6 +1,6 @@
-﻿# Catpure Display
-Was made to work with a shitty usb capture card devices.
-This project was originally started cause someone else showed me theres and i thought i should destroy them with my programing skills.... Oh and that any other method of trying to watch back the footage at a decent speed came with a noticable delay.
+﻿# Capture Display
+Was made to work with shitty USB capture card devices.
+This project was originally started cause someone else showed me their's and I thought I should destroy them with my programming skills... Oh, and any other method of trying to watch back the footage at a decent speed came with a noticable delay.
 
 [the other persons application](https://github.com/Jordy3D/VideoIn-Out).
 
@@ -11,7 +11,7 @@ This project was originally started cause someone else showed me theres and i th
 - Right Click: Toggle Toolbar
 - Double Click: Toggle Fullscreen and Toolbar
 - Q: Refreshes Device Lists
-- R: Restarts Audio And Camera
+- R: Restarts Audio and Camera
 
 ## TODO
 - [ ] Overlays and Filters
