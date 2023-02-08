@@ -19,5 +19,8 @@ This project was originally started cause someone else showed me their's and I t
 - [ ] Code Clean Up
 - [ ] Minimize Virus Scaner Issues
 
+## Known Issues
+- The FPS counter breaks when on some 60Hz inputs
+
 ## Donate
 [![Donate](https://www.paypalobjects.com/en_AU/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?business=VT6TG8KKZM98E&no_recurring=0&currency_code=AUD)
