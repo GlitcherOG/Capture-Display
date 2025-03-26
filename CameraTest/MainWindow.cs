@@ -192,7 +192,7 @@ namespace CaptureDisplay
                 this.FormClosing += (s, ev) => captureDevice.Release(); // release when close.
                 pictureBox1.Visible = true;
 
-                Size originalSize = new Size(1920, 1080);
+                Size originalSize = formats[0].Size;
 
                 captureDevice.SetPreviewControl(pictureBox1.Handle, originalSize);
                 pictureBox1.Resize += (s, ev) => captureDevice.SetPreviewSize(originalSize);
@@ -316,13 +316,18 @@ namespace CaptureDisplay
 				{
 					var tempFPS = showFPS;
 					showFPS = false;
-					//captureDevice.Stop();
-					//captureDevice = new UsbCamera(VideoComboBox.SelectedIndex, UsbCamera.GetVideoFormat(VideoComboBox.SelectedIndex)[RenderSizeComboBox.SelectedIndex]);
+                    //captureDevice.Stop();
+                    this.FormClosing -= (s, ev) => captureDevice.Release();
+                    captureDevice.Release();
+
+					var VideoFormat = UsbCamera.GetVideoFormat(VideoComboBox.SelectedIndex)[RenderSizeComboBox.SelectedIndex];
+                    captureDevice = new UsbCamera(VideoComboBox.SelectedIndex, VideoFormat);
+                    this.FormClosing += (s, ev) => captureDevice.Release();
                     UpdateDisplayMode();
-                    //Size originalSize = new Size(1920, 1080);
-                    //captureDevice.SetPreviewControl(pictureBox1.Handle, originalSize);
-                    //pictureBox1.Resize += (s, ev) => captureDevice.SetPreviewSize(originalSize);
-                    //captureDevice.Start();
+					Size originalSize = VideoFormat.Size;
+					captureDevice.SetPreviewControl(pictureBox1.Handle, originalSize);
+					pictureBox1.Resize += (s, ev) => captureDevice.SetPreviewSize(originalSize);
+					captureDevice.Start();
 					showFPS = tempFPS;
 					SetSettings();
 				}
@@ -367,7 +372,7 @@ namespace CaptureDisplay
 						{
 							var device = UsbCamera.GetVideoFormat(VideoComboBox.SelectedIndex)[RenderSizeComboBox.SelectedIndex];
 
-							ClientSize = new Size(device.Size.Width, device.Size.Height);
+							//ClientSize = new Size(device.Size.Width, device.Size.Height);
 						}
 						break;
 					case 1:
