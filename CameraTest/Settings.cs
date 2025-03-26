@@ -10,7 +10,6 @@ namespace CaptureDisplay
 {
     public class Settings
     {
-        public int RenderMode = 0;
         public string VideoName = "";
         public string AudioName = "";
         public string RenderSizePos = "null";

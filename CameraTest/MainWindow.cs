@@ -8,22 +8,19 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-//using AForge.Video.DirectShow;
-//using AForge.Video;
-using Accord.Video;
-using Accord.Video.DirectShow;
 using NAudio.Wave;
 using NAudio.CoreAudioApi;
 using System.Numerics;
+using GitHub.secile.Video;
 
 namespace CaptureDisplay
 {
 	public partial class DisplayLabel : Form
 	{
 		public static Settings settings;
-		VideoCaptureDevice captureDevice;
+		UsbCamera captureDevice;
 
-		FilterInfoCollection infoCollection;
+		string[] infoCollection;
 		private delegate void SafeCallDelegate();
 
 		DateTimeOffset dateTime;
@@ -50,14 +47,11 @@ namespace CaptureDisplay
 			Closed += Form1_Closed;
 			settings = Settings.Load(Application.UserAppDataPath);
 			this.KeyPreview = true;
-			InitializeComponent();
+            InitializeComponent();
 
-			videoSourcePlayer1.BackColor = Color.Black;
-			pictureBox1.BackColor = Color.Black;
-			pictureBox2.BackColor = Color.Black;
-			videoSourcePlayer1.Dock = DockStyle.Fill;
+            DisplaySizeComboBox.SelectedIndex = 0;
+            pictureBox1.BackColor = Color.Black;
 			pictureBox1.Dock = DockStyle.Fill;
-			pictureBox2.Dock = DockStyle.Fill;
 
 			showFPS = false;
 			FPSCounter.Visible = showFPS;
@@ -71,7 +65,6 @@ namespace CaptureDisplay
 		{
 			Loading = true;
 			DisplaySizeComboBox.SelectedIndex = settings.DisplayModePos;
-			RenderModeComboBox.SelectedIndex = settings.RenderMode;
 			if (VideoComboBox.Items.Contains(settings.VideoName))
 			{
 				VideoComboBox.SelectedIndex = VideoComboBox.Items.IndexOf(settings.VideoName);
@@ -89,7 +82,6 @@ namespace CaptureDisplay
 			if (!Loading)
 			{
 				settings.DisplayModePos = DisplaySizeComboBox.SelectedIndex;
-				settings.RenderMode = RenderModeComboBox.SelectedIndex;
 
 				if (VideoComboBox.SelectedItem != null)
 					settings.VideoName = VideoComboBox.SelectedItem.ToString();
@@ -129,10 +121,9 @@ namespace CaptureDisplay
 
 				showFPS = false;
 
-				if (captureDevice.IsRunning)
+				if (captureDevice != null)
 				{
 					captureDevice.Stop();
-					captureDevice.WaitForStop();
 				}
 			}
 			captureDevice = null;
@@ -149,9 +140,9 @@ namespace CaptureDisplay
 			VideoComboBox.Items.Clear();
 			AudioComboBox.Items.Clear();
 
-			infoCollection = new FilterInfoCollection(FilterCategory.VideoInputDevice);
-			foreach (FilterInfo item in infoCollection)
-				VideoComboBox.Items.Add(item.Name);
+			infoCollection = UsbCamera.FindDevices();
+            foreach (string item in infoCollection)
+				VideoComboBox.Items.Add(item);
 
 			MMDeviceEnumerator enumerator = new MMDeviceEnumerator();
 			var captureDevices = enumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active).ToArray();
@@ -186,49 +177,31 @@ namespace CaptureDisplay
 		{
 			if (captureDevice != null)
 			{
-				captureDevice.SignalToStop();
-				captureDevice.WaitForStop();
-				captureDevice.NewFrame -= CaptureDevice_NewFrame;
-			}
-
-			if (videoSourcePlayer1.VideoSource != null)
-			{
-				videoSourcePlayer1.SignalToStop();
-				videoSourcePlayer1.WaitForStop();
-				videoSourcePlayer1.NewFrame -= VideoSourcePlayer_NewFrame;
-			}
+				captureDevice.Stop();
+                this.FormClosing -= (s, ev) => captureDevice.Release();
+                //captureDevice = null;
+            }
 
 			RenderSizeComboBox.Items.Clear();
 
 			if (VideoComboBox.SelectedIndex != -1)
 			{
-				captureDevice = new VideoCaptureDevice(infoCollection[VideoComboBox.SelectedIndex].MonikerString);
+                var formats = UsbCamera.GetVideoFormat(VideoComboBox.SelectedIndex);
 
-				if (settings.RenderMode == 1 || settings.RenderMode == 2)
+                captureDevice = new UsbCamera(VideoComboBox.SelectedIndex, formats[0]);
+                this.FormClosing += (s, ev) => captureDevice.Release(); // release when close.
+                pictureBox1.Visible = true;
+
+                Size originalSize = new Size(1920, 1080);
+
+                captureDevice.SetPreviewControl(pictureBox1.Handle, originalSize);
+                pictureBox1.Resize += (s, ev) => captureDevice.SetPreviewSize(originalSize);
+
+                captureDevice.Start();
+				for (int i = 0; i < formats.Length; i++)
 				{
-					captureDevice.NewFrame += CaptureDevice_NewFrame;
-
-					bool mode = settings.RenderMode == 1 ? true : false;
-					// Auto-toggles between the two based on the RenderMode
-					pictureBox1.Visible = mode;
-					pictureBox2.Visible = !mode;
-
-					videoSourcePlayer1.Visible = false;
-				}
-				else
-				{
-					videoSourcePlayer1.NewFrame += VideoSourcePlayer_NewFrame;
-					pictureBox1.Visible = false;
-					videoSourcePlayer1.Visible = true;
-					videoSourcePlayer1.VideoSource = new AsyncVideoSource(captureDevice);
-					videoSourcePlayer1.Start();
-				}
-
-				captureDevice.Start();
-				for (int i = 0; i < captureDevice.VideoCapabilities.Length; i++)
-				{
-					Size frameSize = captureDevice.VideoCapabilities[i].FrameSize;
-					int avgFrameRate = captureDevice.VideoCapabilities[i].AverageFrameRate;
+					Size frameSize = formats[i].Size;
+					int avgFrameRate = formats[i].Fps;
 					RenderSizeComboBox.Items.Add($"{frameSize.Width} x{frameSize.Height} @{avgFrameRate}");
 					//RenderSizeComboBox.Items.Add(captureDevice.VideoCapabilities[i].FrameSize.Width.ToString() + " x " + captureDevice.VideoCapabilities[i].FrameSize.Height.ToString() + " @" + captureDevice.VideoCapabilities[i].AverageFrameRate);
 				}
@@ -244,46 +217,43 @@ namespace CaptureDisplay
         #endregion
 
         #region Frame Update
-        private void CaptureDevice_NewFrame(object sender, NewFrameEventArgs eventArgs)
-		{
-			DisableSleep.KeepAwake();
-			if (dateTime == null)
-				dateTime = DateTimeOffset.Now;
+  //      private void CaptureDevice_NewFrame(object sender, NewFrameEventArgs eventArgs)
+		//{
+		//	DisableSleep.KeepAwake();
+		//	if (dateTime == null)
+		//		dateTime = DateTimeOffset.Now;
 
-			var temp = DateTimeOffset.Now;
-			var tempCount = Count;
-			tempCount = (temp - dateTime).TotalSeconds;
-			Count = tempCount;
-			dateTime = temp;
+		//	var temp = DateTimeOffset.Now;
+		//	var tempCount = Count;
+		//	tempCount = (temp - dateTime).TotalSeconds;
+		//	Count = tempCount;
+		//	dateTime = temp;
 
-			if (!RACCheck)
-			{
-				try
-				{
-					if (isDrawing)
-					{
-						Console.WriteLine("Tried drawing a frame while another was in progress.");
-					}
-					//if(isDrawing) return;
+		//	if (!RACCheck)
+		//	{
+		//		try
+		//		{
+		//			if (isDrawing)
+		//			{
+		//				Console.WriteLine("Tried drawing a frame while another was in progress.");
+		//			}
+		//			//if(isDrawing) return;
 
-					isDrawing = true;
+		//			isDrawing = true;
 
-					Bitmap bitmap = (Bitmap)eventArgs.Frame.Clone();
+		//			Bitmap bitmap = (Bitmap)eventArgs.Frame.Clone();
 
-					if (settings.RenderMode == 1)
-						SetImageThreadSafe(pictureBox1, bitmap);
-					else if (settings.RenderMode == 2)
-						SetImageThreadSafe(pictureBox2, bitmap);
+		//			SetImageThreadSafe(pictureBox1, bitmap);
 
-					isDrawing = false;
-				}
-				catch
-				{
+		//			isDrawing = false;
+		//		}
+		//		catch
+		//		{
 
-				}
-			}
-			GC.Collect();
-		}
+		//		}
+		//	}
+		//	GC.Collect();
+		//}
 
 		/// <summary>
 		/// Attempts to set the image in a more threadsafe manner.<br>
@@ -323,7 +293,7 @@ namespace CaptureDisplay
 		{
 			while (true)
 			{
-				Thread.Sleep(1000);
+				Thread.Sleep(200);
 				if (showFPS)
 				{
 					MethodInvoker inv = delegate
@@ -346,11 +316,13 @@ namespace CaptureDisplay
 				{
 					var tempFPS = showFPS;
 					showFPS = false;
-					captureDevice.SignalToStop();
-					captureDevice.WaitForStop();
-					captureDevice.VideoResolution = captureDevice.VideoCapabilities[RenderSizeComboBox.SelectedIndex];
-					UpdateDisplayMode();
-					captureDevice.Start();
+					//captureDevice.Stop();
+					//captureDevice = new UsbCamera(VideoComboBox.SelectedIndex, UsbCamera.GetVideoFormat(VideoComboBox.SelectedIndex)[RenderSizeComboBox.SelectedIndex]);
+                    UpdateDisplayMode();
+                    //Size originalSize = new Size(1920, 1080);
+                    //captureDevice.SetPreviewControl(pictureBox1.Handle, originalSize);
+                    //pictureBox1.Resize += (s, ev) => captureDevice.SetPreviewSize(originalSize);
+                    //captureDevice.Start();
 					showFPS = tempFPS;
 					SetSettings();
 				}
@@ -359,7 +331,7 @@ namespace CaptureDisplay
 			}
 		}
 
-		private void toolStripButton1_Click(object sender, EventArgs e) => ToggleFPS();
+        private void toolStripButton1_Click(object sender, EventArgs e) => ToggleFPS();
 		private void DisplaySizeComboBox_SelectedIndexChanged(object sender, EventArgs e)
 		{
 			SetSettings();
@@ -393,25 +365,20 @@ namespace CaptureDisplay
 						AutoSize = true;
 						if (captureDevice != null)
 						{
-							videoSourcePlayer1.Dock = DockStyle.None;
+							var device = UsbCamera.GetVideoFormat(VideoComboBox.SelectedIndex)[RenderSizeComboBox.SelectedIndex];
 
-							VideoCapabilities device = captureDevice.VideoCapabilities[RenderSizeComboBox.SelectedIndex];
-
-							ClientSize = new Size(device.FrameSize.Width, device.FrameSize.Height);
-							videoSourcePlayer1.Size = new Size(device.FrameSize.Width, device.FrameSize.Height);
+							ClientSize = new Size(device.Size.Width, device.Size.Height);
 						}
 						break;
 					case 1:
 						AutoSize = false;
 						FormBorderStyle = FormBorderStyle.Sizable;
-						videoSourcePlayer1.Dock = DockStyle.Fill;
 						break;
 					case 2: // Cases 2, 3, and 4 were identical
 					case 3: // So every case will just collapse
 					case 4: // And do the same thing at the end
 						AutoSize = false;
 						FormBorderStyle = FormBorderStyle.Sizable;
-						videoSourcePlayer1.Dock = DockStyle.None;
 						break;
 				}
 
@@ -453,8 +420,8 @@ namespace CaptureDisplay
 				case 0:
 
 					AutoSize = false;
-					videoSourcePlayer1.Location = new Point((ClientSize.Width - videoSourcePlayer1.ClientSize.Width) / 2, 
-															(ClientSize.Height - videoSourcePlayer1.ClientSize.Height) / 2);
+                    pictureBox1.Location = new Point((ClientSize.Width - pictureBox1.ClientSize.Width) / 2, 
+															(ClientSize.Height - pictureBox1.ClientSize.Height) / 2);
 					AutoSize = true;
 					break;
 				case 2: // Cases 2, 3, and 4 are functionally identical, just with different values. 
@@ -466,34 +433,21 @@ namespace CaptureDisplay
 					if (test > ClientSize.Height)
 						test = (int)((ClientSize.Height / displayRatio.Y) * displayRatio.X);
 
-					videoSourcePlayer1.Size = test > ClientSize.Height ? new Size(test, ClientSize.Height) :
+                    pictureBox1.Size = test > ClientSize.Height ? new Size(test, ClientSize.Height) :
 																		new Size(ClientSize.Width, test);
 
-					videoSourcePlayer1.Location = new Point((ClientSize.Width - videoSourcePlayer1.ClientSize.Width) / 2, 
-															(ClientSize.Height - videoSourcePlayer1.ClientSize.Height) / 2);
+                    pictureBox1.Location = new Point((ClientSize.Width - pictureBox1.ClientSize.Width) / 2, 
+															(ClientSize.Height - pictureBox1.ClientSize.Height) / 2);
 					break;
 				default:
 					break;
 			}
 
-			// This will set PictureBox2's stats to VideoSourcePlayer1's stats, then set PictureBox1's status to PB2's
-			pictureBox1.Location = pictureBox2.Location = videoSourcePlayer1.Location;
-			pictureBox1.Size = pictureBox2.Size = videoSourcePlayer1.Size;
-			pictureBox1.Dock = pictureBox2.Dock = videoSourcePlayer1.Dock;
 			RACCheck = false;
 		}
 
 		private void MainWindow_ResizeEnd(object sender, EventArgs e) => SizeObjectsScale();
 
-		private void toolStripComboBox1_SelectedIndexChanged(object sender, EventArgs e)
-		{
-			if (RenderModeComboBox.SelectedIndex != -1)
-			{
-				settings.RenderMode = RenderModeComboBox.SelectedIndex;
-				SetSettings();
-				InitalizeCamera();
-			}
-		}
 		#endregion
 
 		#region Audio
