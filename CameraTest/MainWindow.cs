@@ -30,18 +30,11 @@ namespace CaptureDisplay
         bool showFPS = true;
         bool isFullscreen;
 
-        public double CurrentFPS; /*{ get; private set; }*/
-        public DateTimeOffset dateTime;
-        public double Count = 0;
-
         public static Size size;
         public static Point point;
         public static DockStyle dockStyle;
 
-        bool RACCheck; // Resize and Change check, to disable framedrawing when modes or sizes are being set
         bool QuickFix; // Patch bool to fix a thing, best left untouched
-
-        bool isDrawing;
 
         public DisplayLabel()
         {
@@ -106,9 +99,6 @@ namespace CaptureDisplay
             LoadSettings();
 
             UpdateDisplayMode();
-
-            Thread thread1 = new Thread(WriteLableFPS);
-            thread1.Start();
         }
         private void Form1_Closed(object sender, EventArgs e)
         {
@@ -180,7 +170,6 @@ namespace CaptureDisplay
             {
                 captureDevice.Stop();
                 this.FormClosing -= (s, ev) => captureDevice.Release();
-                //captureDevice = null;
             }
 
             RenderSizeComboBox.Items.Clear();
@@ -241,25 +230,6 @@ namespace CaptureDisplay
         }
         #endregion
 
-        #region Frame Update
-        private void WriteLableFPS()
-        {
-            while (true)
-            {
-                Thread.Sleep(200);
-                if (showFPS)
-                {
-                    MethodInvoker inv = delegate
-                    {
-                        this.FPSCounter.Text = $"FPS: {CurrentFPS}";
-                    };
-
-                    this.Invoke(inv);
-                }
-            }
-        }
-        #endregion
-
         #region Display/Scale Options
         private void RenderSizeComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -288,30 +258,6 @@ namespace CaptureDisplay
                         // Wrap the preview control setup in try/catch to avoid crashes
                         try
                         {
-                            // Set the preview control with proper error handling
-                            //captureDevice.PreviewCaptured += (bmp) =>
-                            //{
-                            //    lock (pictureBox1)
-                            //    {
-                            //        try
-                            //        {
-                            //            pictureBox1.Image = bmp;
-                            //            if (dateTime == null)
-                            //                dateTime = DateTimeOffset.Now;
-
-                            //            var temp = DateTimeOffset.Now;
-                            //            var tempCount = Count;
-                            //            tempCount = (temp - dateTime).TotalSeconds;
-                            //            Count = tempCount;
-                            //            dateTime = temp;
-                            //            CurrentFPS = Math.Round((1f / Count), 2);
-                            //        }
-                            //        catch
-                            //        {
-                            //            Console.WriteLine("Error Writing Frame");
-                            //        }
-                            //    }
-                            //};
                             captureDevice.SetPreviewControl(pictureBox1.Handle, originalSize);
 
                             // Remove existing event handlers to avoid multiple subscriptions
@@ -376,11 +322,8 @@ namespace CaptureDisplay
 
         void UpdateDisplayMode()
         {
-            isDrawing = false; // Attempt to avoid clashing with drawcheck in rare race condition
-
             int displayIndex = DisplaySizeComboBox.SelectedIndex;
 
-            RACCheck = true;
             if (displayIndex != -1 && RenderSizeComboBox.SelectedIndex != -1)
             {
                 // Stretch Size
@@ -406,7 +349,6 @@ namespace CaptureDisplay
                     }
                 }
 
-                RACCheck = false;
                 SizeObjectsScale();
                 if (isFullscreen)
                 {
@@ -429,9 +371,6 @@ namespace CaptureDisplay
         {
             int index = DisplaySizeComboBox.SelectedIndex;
 
-            RACCheck = true;
-
-
             // Stretch Mode - ensure picturebox fills the form
             pictureBox1.Dock = DockStyle.Fill;
             pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
@@ -448,8 +387,6 @@ namespace CaptureDisplay
                     Console.WriteLine("Error in stretch mode sizing: " + ex.Message);
                 }
             }
-
-            RACCheck = false;
         }
 
         private void MainWindow_ResizeEnd(object sender, EventArgs e) => SizeObjectsScale();
