@@ -383,79 +383,27 @@ namespace CaptureDisplay
             RACCheck = true;
             if (displayIndex != -1 && RenderSizeComboBox.SelectedIndex != -1)
             {
-                switch (displayIndex)
+                // Stretch Size
+                AutoSize = false;
+                FormBorderStyle = FormBorderStyle.Sizable;
+
+                // When in stretch mode, we need to adjust how the preview is handled
+                pictureBox1.Dock = DockStyle.Fill;
+
+                if (captureDevice != null)
                 {
-                    case 0:
-                        // Match Size
+                    try
+                    {
+                        // Make sure preview adjusts to pictureBox size
+                        captureDevice.SetPreviewSize(pictureBox1.ClientSize);
 
-                        FormBorderStyle = FormBorderStyle.FixedSingle;
-                        AutoSize = true;
-                        if (captureDevice != null)
-                        {
-                            try
-                            {
-                                var device = UsbCamera.GetVideoFormat(VideoComboBox.SelectedIndex)[RenderSizeComboBox.SelectedIndex];
-
-                                // Use a try-catch block to handle any casting issues
-                                try
-                                {
-                                    int width = device.Size.Width;
-                                    int height = device.Size.Height;
-
-                                    // Set the client size
-                                    ClientSize = new Size(width, height);
-
-                                    // Instead of trying to resize the form immediately,
-                                    // let the picturebox handle it through Dock property
-                                    pictureBox1.Dock = DockStyle.Fill;
-                                }
-                                catch (Exception ex)
-                                {
-                                    Console.WriteLine("Error setting size: " + ex.Message);
-                                    // Fall back to letting the picturebox handle sizing
-                                    pictureBox1.Dock = DockStyle.Fill;
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine("Error getting device format: " + ex.Message);
-                            }
-                        }
-                        break;
-                    case 1:
-                        // Stretch Size
-                        AutoSize = false;
-                        FormBorderStyle = FormBorderStyle.Sizable;
-
-                        // When in stretch mode, we need to adjust how the preview is handled
-                        pictureBox1.Dock = DockStyle.Fill;
-
-                        if (captureDevice != null)
-                        {
-                            try
-                            {
-                                // Make sure preview adjusts to pictureBox size
-                                captureDevice.SetPreviewSize(pictureBox1.ClientSize);
-
-                                // Ensure the pictureBox will properly handle the stretch
-                                pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine("Error setting stretch size: " + ex.Message);
-                            }
-                        }
-                        break;
-                    case 2: // Cases 2, 3, and 4 were identical
-                    case 3: // So every case will just collapse
-                    case 4: // And do the same thing at the end
-                            // 3: 16:9
-                            // 4: 16:10
-                            // 5: 4:3
-
-                        AutoSize = false;
-                        FormBorderStyle = FormBorderStyle.Sizable;
-                        break;
+                        // Ensure the pictureBox will properly handle the stretch
+                        pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Error setting stretch size: " + ex.Message);
+                    }
                 }
 
                 RACCheck = false;
@@ -477,64 +425,28 @@ namespace CaptureDisplay
 
         private void MainWindow_SizeChanged(object sender, EventArgs e) => SizeObjectsScale();
 
-        Vector2[] ratios = new Vector2[] {
-            new Vector2(-1, -1),
-            new Vector2(-1, -1),
-            new Vector2(16, 9),
-            new Vector2(16, 10),
-            new Vector2(4, 3)
-        };
-
         void SizeObjectsScale()
         {
             int index = DisplaySizeComboBox.SelectedIndex;
 
             RACCheck = true;
 
-            switch (index)
+
+            // Stretch Mode - ensure picturebox fills the form
+            pictureBox1.Dock = DockStyle.Fill;
+            pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
+
+            // Force a resize of the preview to match current size
+            if (captureDevice != null)
             {
-                case 0:
-
-                    AutoSize = false;
-                    pictureBox1.Location = new Point((ClientSize.Width - pictureBox1.ClientSize.Width) / 2,
-                                                            (ClientSize.Height - pictureBox1.ClientSize.Height) / 2);
-                    AutoSize = true;
-                    break;
-                case 1:
-                    // Stretch Mode - ensure picturebox fills the form
-                    pictureBox1.Dock = DockStyle.Fill;
-                    pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
-
-                    // Force a resize of the preview to match current size
-                    if (captureDevice != null)
-                    {
-                        try
-                        {
-                            captureDevice.SetPreviewSize(pictureBox1.ClientSize);
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine("Error in stretch mode sizing: " + ex.Message);
-                        }
-                    }
-                    break;
-                case 2: // Cases 2, 3, and 4 are functionally identical, just with different values. 
-                case 3: // These values are stored in the ratios array that is used
-                case 4: // Riiight here ----v
-                    Vector2 displayRatio = ratios[index];
-
-                    int test = (int)((ClientSize.Width / displayRatio.X) * displayRatio.Y);
-                    if (test > ClientSize.Height)
-                        test = (int)((ClientSize.Height / displayRatio.Y) * displayRatio.X);
-
-                    pictureBox1.Size = test > ClientSize.Height ? new Size(test, ClientSize.Height) :
-                                                                        new Size(ClientSize.Width, test);
-
-                    pictureBox1.Location = new Point((ClientSize.Width - pictureBox1.ClientSize.Width) / 2,
-                                                            (ClientSize.Height - pictureBox1.ClientSize.Height) / 2);
-                    break;
-                default:
-                    break;
+                try
+                {
+                    captureDevice.SetPreviewSize(pictureBox1.ClientSize);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error in stretch mode sizing: " + ex.Message);
+                }
             }
 
             RACCheck = false;
@@ -618,9 +530,9 @@ namespace CaptureDisplay
                     ToggleFullscreen();
                     InvokeDisplayLabel("Toggled Fullscreen...");
                     break;
-                case Keys.C:
-                    ToggleFPS();
-                    break;
+                //case Keys.C:
+                //    ToggleFPS();
+                //    break;
                 case Keys.R:
                     InitalizeCamera();
                     AudioCapture();
@@ -667,18 +579,24 @@ namespace CaptureDisplay
         private void videoSourcePlayer1_KeyDown(object sender, KeyEventArgs e) => HotKeyGroup(e.KeyCode);
         private void pictureBox1_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e) => HotKeyGroup(e.KeyCode);
 
+        DateTime click = DateTime.Now;
         private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right)
                 toolStrip2.Visible = !toolStrip2.Visible;
-        }
 
-        private void pictureBox1_MouseDoubleClick(object sender, MouseEventArgs e)
-        {
             if (e.Button == MouseButtons.Left)
             {
-                ToggleFullscreen();
-                toolStrip2.Visible = !isFullscreen;
+                if(DateTime.Now.Subtract(click).TotalSeconds <= 1 && DateTime.Now.Subtract(click).TotalSeconds > 0)
+                {
+                    ToggleFullscreen();
+                    toolStrip2.Visible = !isFullscreen;
+                    click = DateTime.Now.AddSeconds(-2);
+                }
+                else
+                {
+                    click = DateTime.Now;
+                }
             }
         }
         #endregion

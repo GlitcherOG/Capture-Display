@@ -136,18 +136,17 @@
             this.toolStripLabel4.Name = "toolStripLabel4";
             this.toolStripLabel4.Size = new System.Drawing.Size(88, 22);
             this.toolStripLabel4.Text = " Display Mode :";
+            this.toolStripLabel4.Visible = false;
             // 
             // DisplaySizeComboBox
             // 
             this.DisplaySizeComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.DisplaySizeComboBox.Items.AddRange(new object[] {
-            "Match Size",
-            "Stretch Size",
-            "Aspect Ratio (16:9)",
-            "Aspect Ratio (16:10)",
-            "Aspect Ratio (4:3)"});
+            "Fill",
+            "Fit"});
             this.DisplaySizeComboBox.Name = "DisplaySizeComboBox";
             this.DisplaySizeComboBox.Size = new System.Drawing.Size(121, 25);
+            this.DisplaySizeComboBox.Visible = false;
             this.DisplaySizeComboBox.SelectedIndexChanged += new System.EventHandler(this.DisplaySizeComboBox_SelectedIndexChanged);
             // 
             // toolStripButton1
@@ -160,6 +159,7 @@
             this.toolStripButton1.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.toolStripButton1.Size = new System.Drawing.Size(76, 22);
             this.toolStripButton1.Text = "FPS Counter";
+            this.toolStripButton1.Visible = false;
             this.toolStripButton1.Click += new System.EventHandler(this.toolStripButton1_Click);
             // 
             // toolStripSeparator4
@@ -167,6 +167,7 @@
             this.toolStripSeparator4.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.toolStripSeparator4.Name = "toolStripSeparator4";
             this.toolStripSeparator4.Size = new System.Drawing.Size(6, 25);
+            this.toolStripSeparator4.Visible = false;
             // 
             // Fullscreen
             // 
@@ -202,7 +203,6 @@
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox1.TabIndex = 7;
             this.pictureBox1.TabStop = false;
-            this.pictureBox1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseDoubleClick);
             this.pictureBox1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseDown);
             this.pictureBox1.PreviewKeyDown += new System.Windows.Forms.PreviewKeyDownEventHandler(this.pictureBox1_PreviewKeyDown);
             // 
@@ -238,7 +238,6 @@
             this.Load += new System.EventHandler(this.Form1_Load);
             this.ResizeEnd += new System.EventHandler(this.MainWindow_ResizeEnd);
             this.SizeChanged += new System.EventHandler(this.MainWindow_SizeChanged);
-            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.videoSourcePlayer1_KeyDown);
             this.MouseEnter += new System.EventHandler(this.MainWindow_MouseEnter);
             this.toolStrip2.ResumeLayout(false);
             this.toolStrip2.PerformLayout();
